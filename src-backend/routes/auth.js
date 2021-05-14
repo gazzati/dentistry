@@ -1,40 +1,33 @@
 const express = require('express')
 const User = require('../model/User')
-
 const router = express.Router()
 
-
-//REGISTRATION
 router.post('/registration', async (req, res) => {
 
-    //Create a new user
     const user = new User({
         email: req.body.email,
         password: req.body.password,
         name: req.body.name,
         surname: req.body.surname,
-        books: []
     })
 
     await user.save()
 
     res.json({
-        message: 'Registration success!',
+        message: 'Успешная регистрация!',
         data: user
     })
 })
 
-//LOGIN
 router.post('/login', async (req, res) => {
 
-    //Checking if the email exists
     const user = await User.findOne({ email: req.body.email })
-    if (!user) return res.json({ message: 'Email is not found' })
+    if (!user) return res.json({ message: 'Email не найден' })
 
-    if (req.body.password !== user.password) return res.json({ message: 'Invalid password' })
+    if (req.body.password !== user.password) return res.json({ message: 'Неверный пароль' })
 
     res.json({
-        message: 'Authorization success!',
+        message: 'Успешная автризация!',
         data: user
     })
 })

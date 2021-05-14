@@ -1,35 +1,50 @@
 const express = require('express')
 const User = require('../model/User')
+const Review = require('../model/Review')
 const router = express.Router()
 
-router.post('/registration', async (req, res) => {
+router.get('/', async (req, res) => {
+    let reviews = []
 
-    const user = new User({
-        email: req.body.email,
-        password: req.body.password,
-        name: req.body.name,
-        surname: req.body.surname,
-    })
+    const allReviews = await Review.find()
+    for(let i = 0; i < allReviews.length; i++) {
+        const user = await User.findById(allReviews[i].userId)
+        reviews.push({...allReviews[i]._doc, author: `${user.name} ${user.surname}`})
+    }
 
-    await user.save()
-
-    res.json({
-        message: 'Registration success!',
-        data: user
+    res.send({
+        message: 'OK',
+        data: reviews
     })
 })
 
-router.post('/login', async (req, res) => {
+router.post('/add', async (req, res) => {
+    const { userId, text, mark } = req.body
 
-    const user = await User.findOne({ email: req.body.email })
-    if (!user) return res.json({ message: 'Email is not found' })
-
-    if (req.body.password !== user.password) return res.json({ message: 'Invalid password' })
-
-    res.json({
-        message: 'Authorization success!',
-        data: user
+    const review = new Review({
+        userId,
+        text,
+        mark,
+        date: new Date()
     })
+
+    try {
+        await review.save()
+
+        let freshReviews = []
+        const allReviews = await Review.find()
+        for(let i = 0; i < allReviews.length; i++) {
+            const user = await User.findById(allReviews[i].userId)
+            freshReviews.push({...allReviews[i]._doc, author: `${user.name} ${user.surname}`})
+        }
+
+        res.status(200).json({
+            message: 'Review was added',
+            data: freshReviews
+        })
+    } catch (err) {
+        res.send({ message: err })
+    }
 })
 
 module.exports = router

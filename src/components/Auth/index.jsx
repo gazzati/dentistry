@@ -2,6 +2,9 @@ import React, {useState} from "react"
 import {Button, Container, CssBaseline, makeStyles, TextField, Typography} from "@material-ui/core"
 
 const useStyles = makeStyles((theme) => ({
+    container: {
+      display: 'flex'
+    },
     paper: {
         marginTop: theme.spacing(8),
         display: 'flex',
@@ -35,6 +38,16 @@ const Auth = ({login, registration}) => {
         surname: ''
     })
 
+    const onLogin = (e) => {
+        e.preventDefault()
+        login(loginData)
+    }
+
+    const onRegistration = (e) => {
+        e.preventDefault()
+        registration(signUpData)
+    }
+
     return (
         <div className='auth'>
             <Container component="main" maxWidth="xs">
@@ -43,12 +56,12 @@ const Auth = ({login, registration}) => {
                     <Typography component="h1" variant="h5">
                         Авторизация
                     </Typography>
-                    <form className={classes.form} noValidate>
+                    <form className={classes.form} noValidate onSubmit={onLogin}>
                         <TextField
                             inputProps={{
-                                autocomplete: 'new-password',
+                                autoComplete: 'new-password',
                                 form: {
-                                    autocomplete: 'off',
+                                    autoComplete: 'off',
                                 },
                             }}
                             variant="outlined"
@@ -94,7 +107,7 @@ const Auth = ({login, registration}) => {
                     <Typography component="h1" variant="h5">
                         Регистрация
                     </Typography>
-                    <form className={classes.form} noValidate>
+                    <form className={classes.form} noValidate onSubmit={onRegistration}>
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -102,9 +115,9 @@ const Auth = ({login, registration}) => {
                             fullWidth
                             id="email"
                             inputProps={{
-                                autocomplete: 'new-password',
+                                autoComplete: 'new-password',
                                 form: {
-                                    autocomplete: 'off',
+                                    autoComplete: 'off',
                                 },
                             }}
                             label="Имя"

@@ -1,14 +1,13 @@
-import React from "react"
+import React, {useState} from "react"
+import {NavLink} from "react-router-dom"
 import {
     AppBar,
     IconButton,
-    makeStyles,
+    makeStyles, Menu, MenuItem,
     Toolbar,
     Typography
 } from "@material-ui/core"
-import MenuIcon from "@material-ui/icons/Menu"
 import {AccountCircle} from "@material-ui/icons"
-import clsx from "clsx"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -20,27 +19,31 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
     },
-    appBarShift: {
-        width: `calc(100% - ${270}px)`,
-        marginLeft: 240,
-        transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
-    },
     headWrap: {
         display: "flex",
         justifyContent: "space-between",
     },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
     hide: {
         display: 'none',
     },
-    burgerBlock: {
+    leftBlock: {
         display: "flex",
         alignItems: "center"
+    },
+    headLink: {
+        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+        textDecoration: 'none !important',
+        marginRight: 16,
+        color: '#fff',
+        fontSize: '1.25rem',
+        fontWeight: 500,
+        lineHeight: 1.6
+    },
+    headLinkActive: {
+        opacity: 0.5
+    },
+    'headLink:hover': { //TODO
+        opacity: 0.7
     },
     rightBlock: {
         display: "flex",
@@ -55,28 +58,44 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-const Header = ({open, setOpen, user}) => {
+const Header = ({user, logout}) => {
     const classes = useStyles()
+    const [anchorEl, setAnchorEl] = useState(null)
 
     return (
         <AppBar
             position="fixed"
-            className={clsx(classes.appBar, {
-                [classes.appBarShift]: open,
-            })}
+            className={classes.appBar}
         >
             <Toolbar className={classes.headWrap}>
-                <div className={classes.burgerBlock}>
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={() => setOpen(true)}
-                        edge="start"
-                        className={clsx(classes.menuButton, open && classes.hide)}
-                    >
-                        <MenuIcon/>
-                    </IconButton>
-                    <Typography variant="h6" noWrap>Библиотека</Typography>
+                <div className={classes.leftBlock}>
+                    {user && user.role === 'user' && <>
+                        <NavLink to='/procedures' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Записаться на прием
+                        </NavLink>
+                        <NavLink to='/records' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Мои записи
+                        </NavLink>
+                        <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Отзывы
+                        </NavLink>
+                    </>}
+                    {user && user.role === 'doctor' && <>
+                        <NavLink to='/records' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Записи пациентов
+                        </NavLink>
+                        <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Отзывы
+                        </NavLink>
+                    </>}
+                    {!user && <>
+                        <NavLink to='/procedures' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Процедуры
+                        </NavLink>
+                        <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Отзывы
+                        </NavLink>
+                    </>}
                 </div>
                 <div className={classes.rightBlock}>
                     <div className={classes.profileBlockWrap}>
@@ -86,9 +105,21 @@ const Header = ({open, setOpen, user}) => {
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
                             color="inherit"
+                            onClick={(e) => setAnchorEl(e.currentTarget)}
                         >
                             <AccountCircle/>
                         </IconButton>
+
+                        <Menu
+                            anchorEl={anchorEl}
+                            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                            transformOrigin={{ vertical: "top", horizontal: "center" }}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={() => setAnchorEl(null)}
+                        >
+                            <MenuItem onClick={logout}>Выход</MenuItem>
+                        </Menu>
                     </div>
                 </div>
             </Toolbar>

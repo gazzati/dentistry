@@ -44,24 +44,24 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const MyProcedures = ({userId}) => {
+const Records = ({user}) => {
     const classes = useStyles()
-    const [procedures, setProcedures] = useState(false)
+    const [records, setRecords] = useState()
     const [term, setTerm] = useState('')
 
     useEffect(() => {
-        getAllProcedures()
+        getAllRecords()
     }, [term])
 
-    const getAllProcedures = async () => {
-        const response = await api.get(`procedures${!!term ? `?term=${term}` : ''}`)
-        setProcedures(response.data.data)
+    const getAllRecords = async () => {
+        const response = await api.get(`records${!!term ? `?term=${term}` : ''}`)
+        setRecords(response.data.data)
     }
 
-    const addProcedure = async (procedureId) => {
-        const response = await api.get('procedures/add', {procedureId, userId})
-        setProcedures(response.data.data)
-        alert('Процедура добавлена')
+    const removeRecord = async (recordId) => {
+        const response = await api.delete('records/remove', {recordId})
+        setRecords(response.data.data)
+        alert('Запись отменена')
     }
 
     return (
@@ -70,8 +70,8 @@ const MyProcedures = ({userId}) => {
                 <Paper component="form" className={classes.root}>
                     <InputBase
                         className={classes.input}
-                        placeholder="Поиск по процедурам"
-                        inputProps={{ 'aria-label': 'Поиск по книгам' }}
+                        placeholder="Поиск по записям"
+                        inputProps={{ 'aria-label': 'Поиск по записям' }}
                         value={term}
                         onChange={(e) => setTerm(e.target.value)}
                     />
@@ -84,23 +84,24 @@ const MyProcedures = ({userId}) => {
                     <Table className={classes.table} size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell>Название</TableCell>
+                                <TableCell>Название процедуры</TableCell>
+                                <TableCell>Пациент</TableCell>
                                 <TableCell>Лечащий врач</TableCell>
-                                <TableCell>Продолжительность</TableCell>
+                                <TableCell>Дата и время</TableCell>
                                 <TableCell>Стоимость</TableCell>
                                 <TableCell> </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {procedures && procedures.map(row => (
+                            {records && records.map(row => (
                                 <TableRow key={row._id}>
                                     <TableCell>{row.title}</TableCell>
                                     <TableCell>{row.doctor}</TableCell>
                                     <TableCell>{row.time}</TableCell>
                                     <TableCell>{row.price}</TableCell>
                                     <TableCell>
-                                        <Button variant="contained" color="primary" onClick={() => addProcedure(row._id)}>
-                                            Записаться
+                                        <Button variant="contained" color="primary" onClick={() => removeRecord(row._id)}>
+                                            Отменить запись
                                         </Button>
                                     </TableCell>
                                 </TableRow >
@@ -113,4 +114,4 @@ const MyProcedures = ({userId}) => {
     )
 }
 
-export default MyProcedures
+export default Records

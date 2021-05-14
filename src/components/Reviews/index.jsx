@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react"
 import api from '../../api'
 import {
     Button,
-    Grid, IconButton, InputBase,
+    Grid, TextField,
     makeStyles,
     Paper,
     Table,
@@ -12,8 +12,6 @@ import {
     TableHead,
     TableRow
 } from "@material-ui/core"
-import SearchIcon from "@material-ui/icons/Search"
-import clsx from "clsx"
 
 const useStyles = makeStyles((theme) => ({
     content: {
@@ -25,11 +23,21 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
     },
-    contentShift: {
-        transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
+    addReview: {
+      marginBottom: 32,
+        padding: 16,
+        display: 'flex'
+    },
+    addReviewInput: {
+        width: '100%',
+        marginRight: 16
+    },
+    addReviewMark: {
+        width: 240,
+        marginRight: 16
+    },
+    addReviewBtn: {
+        width: 222
     },
     table: {
         minWidth: 650
@@ -51,64 +59,73 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const Procedures = ({open, userId}) => {
+const Reviews = ({userId}) => {
     const classes = useStyles()
-    const [procedures, setProcedures] = useState(false)
-    const [term, setTerm] = useState('')
+    const [text, setText] = useState('')
+    const [mark, setMark] = useState('')
+    const [reviews, setReviews] = useState(false)
 
     useEffect(() => {
-        getAllProcedures()
-    }, [term])
+        getAllReviews()
+    }, [])
 
-    const getAllProcedures = async () => {
-        const response = await api.get(`procedures${!!term ? `?term=${term}` : ''}`)
-        setProcedures(response.data.data)
+    const getAllReviews = async () => {
+        const response = await api.get('reviews')
+        setReviews(response.data.data)
     }
 
-    const addProcedure = async (bookId) => {
-        const response = await api.get('procedures/add', {bookId, userId})
-        setProcedures(response.data.data)
-        alert('Книга добавлена')
+    const addReview = async () => {
+        const response = await api.post('reviews/add', {userId, text, mark})
+        setReviews(response.data.data)
+        setText('')
+        setMark('')
+        alert('Отзыв добавлен')
     }
 
     return (
         <Grid container >
-            <Grid className={clsx(classes.content, {[classes.contentShift]: open})}>
-                <Paper component="form" className={classes.root}>
-                    <InputBase
-                        className={classes.input}
-                        placeholder="Поиск по процедурам"
-                        inputProps={{ 'aria-label': 'Поиск по книгам' }}
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
+            <Grid className={classes.content}>
+                <Paper className={classes.addReview}>
+                    <TextField
+                        id="outlined-multiline-flexible"
+                        label="Ваш отзыв"
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        variant="outlined"
+                        required
+                        className={classes.addReviewInput}
                     />
-                    <IconButton className={classes.iconButton} aria-label="search">
-                        <SearchIcon />
-                    </IconButton>
+                    <TextField
+                        id="outlined-multiline-flexible"
+                        label="Оценка от 0 до 5"
+                        value={mark}
+                        onChange={e => setMark(e.target.value)}
+                        variant="outlined"
+                        required
+                        className={classes.addReviewMark}
+                    />
+                    <Button variant="contained" color="primary" className={classes.addReviewBtn} onClick={addReview}>
+                        Отправить
+                    </Button>
                 </Paper>
-
                 <TableContainer component={Paper}>
                     <Table className={classes.table} size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell>Название</TableCell>
-                                <TableCell>Лечащий врач</TableCell>
-                                <TableCell>Продолжительность</TableCell>
-                                <TableCell>Стоимость</TableCell>
-                                <TableCell> </TableCell>
+                                <TableCell>Посетитель</TableCell>
+                                <TableCell>Отзыв</TableCell>
+                                <TableCell>Оценка</TableCell>
+                                <TableCell>Дата</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {procedures && procedures.map(row => (
+                            {reviews && reviews.map(row => (
                                 <TableRow key={row._id}>
-                                    <TableCell>{row.title}</TableCell>
-                                    <TableCell>{row.doctor}</TableCell>
-                                    <TableCell>{row.time}</TableCell>
-                                    <TableCell>{row.price}</TableCell>
+                                    <TableCell>{row.author}</TableCell>
+                                    <TableCell>{row.text}</TableCell>
+                                    <TableCell>{row.mark}</TableCell>
                                     <TableCell>
-                                        <Button variant="contained" color="primary" onClick={() => addProcedure(row._id)}>
-                                            Записаться
-                                        </Button>
+                                        {`${row.date.slice(8, 10)}.${row.date.slice(5, 7)}.${row.date.slice(0, 4)} - ${row.date.slice(11, 13)}:${row.date.slice(14, 16)}`}
                                     </TableCell>
                                 </TableRow >
                             ))}
@@ -120,4 +137,4 @@ const Procedures = ({open, userId}) => {
     )
 }
 
-export default Procedures
+export default Reviews

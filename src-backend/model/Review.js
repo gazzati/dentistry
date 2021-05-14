@@ -1,32 +1,22 @@
 const mongoose =  require('mongoose')
 
-const userSchema = new mongoose.Schema({
-    email: {
+const reviewSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        required: true,
+    },
+    text: {
         type: String,
         required: true,
     },
-    password: {
+    mark: {
         type: String,
         required: true,
     },
-    name: {
-        type: String,
-        required: true,
-    },
-    surname: {
-        type: String,
-        required: true,
-    },
-    role: {
-        type: String,
-        required: true,
-        default: 'user'
-    },
-    procedures: [
-        {
-            type: mongoose.Schema.ObjectId
-        }
-    ]
-}, { collection: "users" })
+    date: {
+        type: Date,
+        required: true
+    }
+}, { collection: "reviews" })
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('Reviews', reviewSchema)

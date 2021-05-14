@@ -17,11 +17,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    books: [
-        {
-            type: mongoose.Schema.ObjectId
-        }
-    ]
+    role: {
+        type: String,
+        required: true,
+        default: 'user'
+    }
 }, { collection: "users" })
 
 module.exports = mongoose.model('User', userSchema)
