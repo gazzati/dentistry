@@ -1,12 +1,6 @@
 import React, {useState} from "react"
 import {NavLink} from "react-router-dom"
-import {
-    AppBar,
-    IconButton,
-    makeStyles, Menu, MenuItem,
-    Toolbar,
-    Typography
-} from "@material-ui/core"
+import {AppBar, IconButton, makeStyles, Menu, MenuItem, Toolbar, Typography} from "@material-ui/core"
 import {AccountCircle} from "@material-ui/icons"
 
 const useStyles = makeStyles((theme) => ({
@@ -42,9 +36,6 @@ const useStyles = makeStyles((theme) => ({
     headLinkActive: {
         opacity: 0.5
     },
-    'headLink:hover': { //TODO
-        opacity: 0.7
-    },
     rightBlock: {
         display: "flex",
         alignItems: "center",
@@ -61,6 +52,11 @@ const useStyles = makeStyles((theme) => ({
 const Header = ({user, logout}) => {
     const classes = useStyles()
     const [anchorEl, setAnchorEl] = useState(null)
+
+    const handleLogout = () => {
+        setAnchorEl(null)
+        logout()
+    }
 
     return (
         <AppBar
@@ -79,6 +75,9 @@ const Header = ({user, logout}) => {
                         <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
                             Отзывы
                         </NavLink>
+                        <NavLink to='/contacts' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Контакты
+                        </NavLink>
                     </>}
                     {user && user.role === 'doctor' && <>
                         <NavLink to='/records' className={classes.headLink} activeClassName={classes.headLinkActive}>
@@ -86,6 +85,9 @@ const Header = ({user, logout}) => {
                         </NavLink>
                         <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
                             Отзывы
+                        </NavLink>
+                        <NavLink to='/contacts' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Контакты
                         </NavLink>
                     </>}
                     {!user && <>
@@ -95,32 +97,40 @@ const Header = ({user, logout}) => {
                         <NavLink to='/reviews' className={classes.headLink} activeClassName={classes.headLinkActive}>
                             Отзывы
                         </NavLink>
+                        <NavLink to='/contacts' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Контакты
+                        </NavLink>
                     </>}
                 </div>
                 <div className={classes.rightBlock}>
-                    <div className={classes.profileBlockWrap}>
-                        <Typography variant="h6" noWrap>{user && `${user.name} ${user.surname}`}</Typography>
-                        <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            color="inherit"
-                            onClick={(e) => setAnchorEl(e.currentTarget)}
-                        >
-                            <AccountCircle/>
-                        </IconButton>
+                    {user && user._id
+                        ? <div className={classes.profileBlockWrap}>
+                            <Typography variant="h6" noWrap>{user && `${user.name} ${user.surname}`}</Typography>
+                            <IconButton
+                                aria-label="account of current user"
+                                aria-controls="menu-appbar"
+                                aria-haspopup="true"
+                                color="inherit"
+                                onClick={(e) => setAnchorEl(e.currentTarget)}
+                            >
+                                <AccountCircle/>
+                            </IconButton>
 
-                        <Menu
-                            anchorEl={anchorEl}
-                            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                            transformOrigin={{ vertical: "top", horizontal: "center" }}
-                            keepMounted
-                            open={Boolean(anchorEl)}
-                            onClose={() => setAnchorEl(null)}
-                        >
-                            <MenuItem onClick={logout}>Выход</MenuItem>
-                        </Menu>
-                    </div>
+                            <Menu
+                                anchorEl={anchorEl}
+                                anchorOrigin={{vertical: "top", horizontal: "center"}}
+                                transformOrigin={{vertical: "top", horizontal: "center"}}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={() => setAnchorEl(null)}
+                            >
+                                <MenuItem onClick={handleLogout}>Выход</MenuItem>
+                            </Menu>
+                        </div>
+                        : <NavLink to='/login' className={classes.headLink} activeClassName={classes.headLinkActive}>
+                            Авторизоваться
+                        </NavLink>
+                    }
                 </div>
             </Toolbar>
         </AppBar>

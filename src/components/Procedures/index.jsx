@@ -13,10 +13,11 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Modal, Select, MenuItem
+    Modal, Select, MenuItem, CircularProgress
 } from "@material-ui/core"
 import SearchIcon from "@material-ui/icons/Search"
 import {DatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers"
+import {Redirect} from "react-router-dom"
 
 const useStyles = makeStyles((theme) => ({
     content: {
@@ -65,52 +66,51 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const Procedures = ({userId}) => {
+const Procedures = ({user}) => {
     const classes = useStyles()
     const [open, setOpen] = useState(false)
-    const [procedures, setProcedures] = useState([
-        {_id: 1111, title: '111', description: '11111_', time: '111+', price: '111#'},
-        {_id: 2222, title: '222', description: '2222_', time: '222+', price: '222#'},
-        {_id: 333, title: '3333', description: '33_', time: '333+', price: '333#'}
-    ])
-    const [doctors, setDoctors] = useState([
-        {_id: 111, name: 'first', surname: 'first'},
-        {_id: 222, name: 'sec', surname: 'sec'},
-        {_id: 333, name: 'third', surname: 'third'}
-    ])
+    const [procedures, setProcedures] = useState()
+    const [doctors, setDoctors] = useState()
     const [term, setTerm] = useState('')
     const [recordData, setRecordData] = useState({procedureId: '', userId: '', doctorId: '', date: new Date()})
     const [hours, setHours] = useState('9')
     const [doctor, setDoctor] = useState(null)
+    const [loading, setLoading] = useState()
+    const times = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 
     useEffect(() => {
         const date = new Date()
         date.setHours(9)
         date.setMinutes(0)
         date.setSeconds(0)
-        userId && setRecordData({...recordData, date, userId})
+        user && user._id && setRecordData({...recordData, date, userId: user._id})
         getAllProcedures()
         getAllDoctors()
     }, [term])
 
     const getAllProcedures = async () => {
+        setLoading(true)
         const response = await api.get(`procedures${!!term ? `?term=${term}` : ''}`)
         setProcedures(response.data.data)
+        setLoading(false)
     }
 
     const getAllDoctors = async () => {
+        setLoading(true)
         const response = await api.get('doctors')
         setDoctors(response.data.data)
+        setLoading(false)
     }
 
     const addProcedure = async () => {
-        //await api.post('records/add', recordData)
-        //alert('Запись успешно создана')
+        setLoading(true)
         if (!recordData.doctorId || !recordData.date || !recordData.procedureId || !recordData.userId) {
             return alert('Заполните все поля')
         }
-        console.log(recordData)
         setOpen(false)
+        await api.post('records/add', recordData)
+        alert('Запись успешно создана')
+        setLoading(false)
     }
 
     const openModal = (procedureId) => {
@@ -130,8 +130,25 @@ const Procedures = ({userId}) => {
         setRecordData({...recordData, doctorId})
     }
 
+    const getTimesRange = () => {
+        const currentDate = new Date()
+        const datesDiffs = Math.ceil((recordData.date.getTime() - currentDate.getTime()) / (1000 * 3600 * 24))
+        if(datesDiffs < 2) {
+            return times.filter(time => time === 12 || time === 18)
+        }
+        if(datesDiffs < 5) {
+            return times.filter(time => time === 10 || time === 12 || time === 15 || time === 18)
+        }
+        return times
+    }
+
+    if(user && user.role === 'doctor') {
+        return <Redirect to={'records'}/>
+    }
+
     return (
         <Grid container>
+            {loading && <CircularProgress className='loading'/>}
             <Grid className={classes.content}>
                 <Paper component="form" className={classes.root}>
                     <InputBase
@@ -154,7 +171,7 @@ const Procedures = ({userId}) => {
                                 <TableCell>Описание</TableCell>
                                 <TableCell>Продолжительность</TableCell>
                                 <TableCell>Стоимость</TableCell>
-                                {userId && <TableCell> </TableCell>}
+                                {user && user._id && <TableCell> </TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -164,7 +181,7 @@ const Procedures = ({userId}) => {
                                     <TableCell>{row.description}</TableCell>
                                     <TableCell>{row.time}</TableCell>
                                     <TableCell>{row.price}</TableCell>
-                                    {userId &&
+                                    {user && user._id &&
                                     <TableCell>
                                         <Button variant="contained" color="primary" onClick={() => openModal(row._id)}>
                                             Записаться
@@ -188,7 +205,7 @@ const Procedures = ({userId}) => {
                             onChange={e => handleDoctorChange(e.target.value)}
                             className={classes.doctorSelect}
                         >
-                            {doctors.map(doctor =>
+                            {doctors && doctors.map(doctor =>
                                 <MenuItem key={doctor._id} value={doctor._id}>
                                     {`${doctor.name} ${doctor.surname}`}
                                 </MenuItem>)
@@ -205,6 +222,7 @@ const Procedures = ({userId}) => {
                                 onChange={date => setRecordData({...recordData, date})}
                                 format="d MMM yyyy"
                                 cancelLabel="отмена"
+                                minDate={new Date()}
                             />
                         </MuiPickersUtilsProvider>
 
@@ -213,9 +231,7 @@ const Procedures = ({userId}) => {
                             onChange={e => handleTimeChange(e.target.value)}
                             className={classes.timeSelect}
                         >
-                            <MenuItem value={9}>9:00</MenuItem>
-                            <MenuItem value={10}>10:00</MenuItem>
-                            <MenuItem value={11}>11:00</MenuItem>
+                            {getTimesRange().map(time => <MenuItem key={time} value={time.toString()}>{`${time}:00`}</MenuItem>)}
                         </Select>
                     </div>
 

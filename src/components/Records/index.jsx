@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react"
 import api from '../../api'
+import {getDate} from '../../helpers/getDate'
 import {
-    Button,
-    Grid, IconButton, InputBase,
+    Button, CircularProgress,
+    Grid,
     makeStyles,
     Paper,
     Table,
@@ -12,7 +13,6 @@ import {
     TableHead,
     TableRow
 } from "@material-ui/core"
-import SearchIcon from "@material-ui/icons/Search"
 
 const useStyles = makeStyles((theme) => ({
     content: {
@@ -26,68 +26,45 @@ const useStyles = makeStyles((theme) => ({
     },
     table: {
         minWidth: 650
-    },
-    root: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        width: 400,
-        backgroundColor: 'whitesmoke',
-        margin: '0 auto 40px'
-    },
-    input: {
-        marginLeft: theme.spacing(1),
-        flex: 1,
-    },
-    iconButton: {
-        padding: 10,
-    },
+    }
 }))
 
 const Records = ({user}) => {
     const classes = useStyles()
     const [records, setRecords] = useState()
-    const [term, setTerm] = useState('')
+    const [loading, setLoading] = useState()
 
     useEffect(() => {
         getAllRecords()
-    }, [term])
+    }, [])
 
     const getAllRecords = async () => {
-        const response = await api.get(`records${!!term ? `?term=${term}` : ''}`)
+        setLoading(true)
+        const response = await api.get(`records?userId=${user._id}${user.role === 'doctor' ? `&isDoctor=true` : ''}`)
         setRecords(response.data.data)
+        setLoading(false)
     }
 
     const removeRecord = async (recordId) => {
-        const response = await api.delete('records/remove', {recordId})
-        setRecords(response.data.data)
+        setLoading(true)
+        await api.post('records/remove', {recordId})
+        setRecords(records => records.filter(record => record._id !== recordId))
         alert('Запись отменена')
+        setLoading(false)
     }
 
     return (
         <Grid container >
             <Grid className={classes.content}>
-                <Paper component="form" className={classes.root}>
-                    <InputBase
-                        className={classes.input}
-                        placeholder="Поиск по записям"
-                        inputProps={{ 'aria-label': 'Поиск по записям' }}
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
-                    />
-                    <IconButton className={classes.iconButton} aria-label="search">
-                        <SearchIcon />
-                    </IconButton>
-                </Paper>
-
+                {loading && <CircularProgress className='loading'/>}
                 <TableContainer component={Paper}>
                     <Table className={classes.table} size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
                                 <TableCell>Название процедуры</TableCell>
                                 <TableCell>Пациент</TableCell>
-                                <TableCell>Лечащий врач</TableCell>
                                 <TableCell>Дата и время</TableCell>
+                                <TableCell>Лечащий врач</TableCell>
                                 <TableCell>Стоимость</TableCell>
                                 <TableCell> </TableCell>
                             </TableRow>
@@ -95,12 +72,13 @@ const Records = ({user}) => {
                         <TableBody>
                             {records && records.map(row => (
                                 <TableRow key={row._id}>
-                                    <TableCell>{row.title}</TableCell>
-                                    <TableCell>{row.doctor}</TableCell>
-                                    <TableCell>{row.time}</TableCell>
-                                    <TableCell>{row.price}</TableCell>
+                                    <TableCell>{row.procedure.title}</TableCell>
+                                    <TableCell>{`${row.user.name} ${row.user.surname}`}</TableCell>
+                                    <TableCell>{getDate(row.date)}</TableCell>
+                                    <TableCell>{`${row.doctor.name} ${row.doctor.surname}`}</TableCell>
+                                    <TableCell>{row.procedure.price}</TableCell>
                                     <TableCell>
-                                        <Button variant="contained" color="primary" onClick={() => removeRecord(row._id)}>
+                                        <Button variant="contained" color="secondary" onClick={() => removeRecord(row._id)}>
                                             Отменить запись
                                         </Button>
                                     </TableCell>

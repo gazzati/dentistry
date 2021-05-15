@@ -18,6 +18,7 @@ const authRoute = require('./routes/auth')
 const procedureRoute = require('./routes/procedure')
 const reviewRoute = require('./routes/review')
 const doctorRoute = require('./routes/doctor')
+const rectorRoute = require('./routes/record')
 
 //Middleware
 app.use(express.json())
@@ -28,5 +29,6 @@ app.use('/auth', authRoute)
 app.use('/procedures', procedureRoute)
 app.use('/reviews', reviewRoute)
 app.use('/doctors', doctorRoute)
+app.use('/records', rectorRoute)
 
 app.listen(PORT, () => console.log('Server Up and running'))

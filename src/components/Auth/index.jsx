@@ -1,4 +1,5 @@
 import React, {useState} from "react"
+import {Redirect} from "react-router-dom"
 import {Button, Container, CssBaseline, makeStyles, TextField, Typography} from "@material-ui/core"
 
 const useStyles = makeStyles((theme) => ({
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const Auth = ({login, registration}) => {
+const Auth = ({login, registration, userId}) => {
     const classes = useStyles()
     const [loginData, setLoginData] = useState({
         email: '',
@@ -46,6 +47,10 @@ const Auth = ({login, registration}) => {
     const onRegistration = (e) => {
         e.preventDefault()
         registration(signUpData)
+    }
+
+    if(userId) {
+        return <Redirect to={'procedures'}/>
     }
 
     return (

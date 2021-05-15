@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
                 title: searchFilter
             },
             {
-                doctor: searchFilter
+                description: searchFilter
             }
         ]
     })
@@ -39,24 +39,5 @@ router.post('/my', async (req, res) => {
         data: procedures
     })
 })
-
-// router.post('/add', async (req, res) => {
-//     const { userId, procedureId } = req.body
-//
-//     await User.findByIdAndUpdate(userId,
-//         {
-//             $push: {
-//                 procedures: procedureId
-//             }
-//         }
-//     )
-//
-//     const user = await User.findById(userId)
-//
-//     res.send({
-//         message: 'OK',
-//         data: user
-//     })
-// })
 
 module.exports = router

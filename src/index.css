@@ -11,11 +11,25 @@ h3 {
   margin: 0;
 }
 
-.auth {
-  display: flex;
+a:hover {
+  opacity: .7;
 }
 
-tr td:last-child {
+.auth {
   display: flex;
-  justify-content: flex-end;
+  margin-top: 80px;
+}
+
+tr td, tr th {
+  height: 32px;
+}
+
+.googleMap {
+  border: none;
+}
+
+.loading {
+  position: absolute;
+  left: 45%;
+  top: 400px;
 }
