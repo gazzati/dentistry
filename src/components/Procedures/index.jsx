@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react"
 import api from '../../api'
+import {getSpecialty} from "../../helpers/getSpecialty"
 import DateFnsUtils from "@date-io/date-fns"
 import ruLocale from "date-fns/locale/ru"
 import {
@@ -85,7 +86,6 @@ const Procedures = ({user}) => {
         date.setSeconds(0)
         user && user._id && setRecordData({...recordData, date, userId: user._id})
         getAllProcedures()
-        getAllDoctors()
     }, [term])
 
     const getAllProcedures = async () => {
@@ -95,9 +95,9 @@ const Procedures = ({user}) => {
         setLoading(false)
     }
 
-    const getAllDoctors = async () => {
+    const getAllDoctors = async (doers) => {
         setLoading(true)
-        const response = await api.get('doctors')
+        const response = await api.post('doctors', {doers})
         setDoctors(response.data.data)
         setLoading(false)
     }
@@ -113,8 +113,9 @@ const Procedures = ({user}) => {
         setLoading(false)
     }
 
-    const openModal = (procedureId) => {
-        setRecordData({...recordData, procedureId})
+    const openModal = (procedure) => {
+        getAllDoctors(procedure.doers)
+        setRecordData({...recordData, procedureId: procedure._id})
         setOpen(true)
     }
 
@@ -168,7 +169,6 @@ const Procedures = ({user}) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Название</TableCell>
-                                <TableCell>Описание</TableCell>
                                 <TableCell>Продолжительность</TableCell>
                                 <TableCell>Стоимость</TableCell>
                                 {user && user._id && <TableCell> </TableCell>}
@@ -178,12 +178,11 @@ const Procedures = ({user}) => {
                             {procedures && procedures.map(row => (
                                 <TableRow key={row._id}>
                                     <TableCell>{row.title}</TableCell>
-                                    <TableCell>{row.description}</TableCell>
                                     <TableCell>{row.time}</TableCell>
-                                    <TableCell>{row.price}</TableCell>
+                                    <TableCell>{`${row.price} р.`}</TableCell>
                                     {user && user._id &&
                                     <TableCell>
-                                        <Button variant="contained" color="primary" onClick={() => openModal(row._id)}>
+                                        <Button variant="contained" color="primary" onClick={() => openModal(row)}>
                                             Записаться
                                         </Button>
                                     </TableCell>}
@@ -207,7 +206,7 @@ const Procedures = ({user}) => {
                         >
                             {doctors && doctors.map(doctor =>
                                 <MenuItem key={doctor._id} value={doctor._id}>
-                                    {`${doctor.name} ${doctor.surname}`}
+                                    {`${doctor.name} ${doctor.surname} - ${getSpecialty(doctor.specialty)}`}
                                 </MenuItem>)
                             }
                         </Select>

@@ -20,7 +20,12 @@ const procedureSchema = new mongoose.Schema({
         type: Number,
         required: true,
 
-    }
+    },
+    doers: [
+        {
+            type: String
+        }
+    ]
 }, { collection: "procedures" })
 
 module.exports = mongoose.model('Procedure', procedureSchema)

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react"
 import api from '../../api'
 import {getDate} from '../../helpers/getDate'
+import {getSpecialty} from "../../helpers/getSpecialty"
 import {
     Button, CircularProgress,
     Grid,
@@ -65,6 +66,7 @@ const Records = ({user}) => {
                                 <TableCell>Пациент</TableCell>
                                 <TableCell>Дата и время</TableCell>
                                 <TableCell>Лечащий врач</TableCell>
+                                <TableCell>Специальность</TableCell>
                                 <TableCell>Стоимость</TableCell>
                                 <TableCell> </TableCell>
                             </TableRow>
@@ -76,6 +78,7 @@ const Records = ({user}) => {
                                     <TableCell>{`${row.user.name} ${row.user.surname}`}</TableCell>
                                     <TableCell>{getDate(row.date)}</TableCell>
                                     <TableCell>{`${row.doctor.name} ${row.doctor.surname}`}</TableCell>
+                                    <TableCell>{getSpecialty(row.doctor.specialty)}</TableCell>
                                     <TableCell>{row.procedure.price}</TableCell>
                                     <TableCell>
                                         <Button variant="contained" color="secondary" onClick={() => removeRecord(row._id)}>
